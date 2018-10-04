@@ -11,7 +11,7 @@ the directory where the trained model (model_0.pt) and corpus
 (corpus.8d62dad9d767f8b663ab8699acd7ab95.data) are downloaded
 
 
-##Example
+## Example     
 
 ``` 	
 import sys; 
