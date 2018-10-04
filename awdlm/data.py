@@ -42,6 +42,7 @@ class Corpus(object):
                 tokens += len(words)
                 for word in words:
                     self.dictionary.add_word(word)
+            print('num of tokens =',tokens)
 
         # Tokenize file content
         with open(path, 'r') as f:

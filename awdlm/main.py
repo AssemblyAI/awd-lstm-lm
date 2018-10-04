@@ -114,6 +114,7 @@ from splitcross import SplitCrossEntropyLoss
 criterion = None
 
 ntokens = len(corpus.dictionary)
+print('Num of vocab =', ntokens)
 model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.dropouth, args.dropouti, args.dropoute, args.wdrop, args.tied)
 ###
 if args.resume:
