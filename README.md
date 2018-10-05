@@ -6,9 +6,11 @@
 sudo python3 setup.py install
 ```     
 
-change model_corpus_dir in /awd-lstm-lm/awdlm/sent_prob.py to point to 
-the directory where the trained model (model_0.pt) and corpus 
-(corpus.8d62dad9d767f8b663ab8699acd7ab95.data) are downloaded
+change `model_corpus_dir` in `/awd-lstm-lm/awdlm/sent_prob.py` to point to 
+the directory where the trained model (`model_0.pt`) and corpus 
+(`corpus.8d62dad9d767f8b663ab8699acd7ab95.data`) are downloaded.
+
+Or, set the `AWD_LM_DIR` env var to this dir (eg `export AWD_LM_DIR='/home/ubuntu/awd-lstm-lm/'`.
 
 
 ## Example     
