@@ -11,7 +11,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser(description='PyTorch PTB Language Model')
 
-model_corpus_dir = '/home/ubuntu/awd-lstm-lm/'
+model_corpus_dir = os.environ.get('AWD_LM_DIR', '/home/ubuntu/awd-lstm-lm/')
 
 
 # Model parameters.
