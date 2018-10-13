@@ -8,6 +8,7 @@ import hashlib
 import model
 from utils import batchify, get_batch, repackage_hidden
 import numpy as np
+from collections import OrderedDict
 
 parser = argparse.ArgumentParser(description='PyTorch PTB Language Model')
 
@@ -64,7 +65,7 @@ if args.cuda:
 hidden_0 = model.init_hidden(1)
 
 unk_token = 'UNKNOWNWORD'
-model_hist = {}    # maps sentence to [log_prob, hidden, prev_x]
+model_hist = OrderedDict()    # maps sentence to [log_prob, hidden, prev_x]
 # get sent1 if (sent1-word) in model_hist then 
 # return model_hist[(sent1-word)][0] + get_sent_logprob(last two words in sent1, model_hist[(sent1-word)][1]) 
 
@@ -82,7 +83,6 @@ def get_sent_logprob_batch(sent_batch):
     new_sent_ids  = []
     all_log_props = [0]*len(original_sentences)
 
-
     for i, sent in enumerate(original_sentences):
         if not(sent in model_hist):
             sent_batch.append(sent)
@@ -90,7 +90,16 @@ def get_sent_logprob_batch(sent_batch):
         else:
             all_log_props[i] = model_hist[sent][0]
 
-    batch_size = len(sent_batch)
+    batch_size       = len(sent_batch)
+
+
+    max_history_size = 3*5000 #assuming max beam width = 5000
+
+    while( len(model_hist) > max_history_size ):
+        model_hist.popitem(last=False)
+
+
+
     sent_batch_original = sent_batch.copy()
     log_probs  = [0]*batch_size
     #print('batch_size = ', batch_size)
