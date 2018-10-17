@@ -75,6 +75,14 @@ def remove_last_word(sent):
 def get_last_two_words(sent):
     return ' '.join(sent.split()[-2:])
 
+def get_word_freq(word):
+    if word == unk_token:
+        return 0
+    elif word in corpus.dictionary.word2idx:
+        idx = corpus.dictionary.word2idx[word]
+        return corpus.dictionary.counter[idx]
+    else:
+        return 0
 
 
 def get_sent_logprob_batch(sent_batch):
@@ -97,8 +105,6 @@ def get_sent_logprob_batch(sent_batch):
 
     while( len(model_hist) > max_history_size ):
         model_hist.popitem(last=False)
-
-
 
     sent_batch_original = sent_batch.copy()
     log_probs  = [0]*batch_size
@@ -169,6 +175,13 @@ def get_sent_logprob_batch(sent_batch):
             if i < (len(sent)-1):
                 words.append( sent[i] )
                 next_words.append( sent[i+1] )
+                freq = min( get_word_freq(sent[i]), get_word_freq(sent[i+1]) )
+                if freq < 200:
+                    #print('freq < 10')
+                    words.append( unk_token )
+                    next_words.append( unk_token )
+                    finished_sentences.append(j)
+                    log_probs[j] = -1000                    
             else:
                 words.append( unk_token )
                 next_words.append( unk_token )
@@ -177,8 +190,8 @@ def get_sent_logprob_batch(sent_batch):
         word_idxs      = [corpus.dictionary.word2idx[word] for word in words]
         next_word_idxs = [corpus.dictionary.word2idx[next_word] for next_word in next_words] 
         #print(word_idxs)
-        for i in range(batch_size):
-            input_batch.data[0,i].fill_(word_idxs[i])
+        for j in range(batch_size):
+            input_batch.data[0,j].fill_(word_idxs[j])
         #print_d('input_batch')
         #print(input_batch)
         output, hidden = model(input_batch, hidden)
@@ -186,10 +199,17 @@ def get_sent_logprob_batch(sent_batch):
         props = torch.nn.functional.softmax(output_flat,dim=1)
         #print(props.size())
 
-        for i in range(batch_size):
-            if not(i in finished_sentences):
-                log_prob = torch.log10( props[i][next_word_idxs[i]] )
-                log_probs[i] += log_prob.tolist()
+        for j in range(batch_size):
+            if not(j in finished_sentences):
+                """
+                prior = 0
+                if get_word_freq(next_words[j]):
+                    prior = np.log10( get_word_freq(next_words[j]) / 3287751 )
+                else:
+                    prior = 0
+                """
+                log_prob = torch.log10( props[j][next_word_idxs[j]] ) #+ prior
+                log_probs[j] += log_prob.tolist()
 
         hidden = repackage_hidden(hidden)
 
@@ -289,6 +309,7 @@ def get_sent_logprob(sentence, hidden_prev = None, prev_x = None):
         model_hist[sentence] = [sum(log_probs), hidden, prev_x]
 
     return sum(log_probs), hidden, prev_x
+
 
 """
 log_probs,_,_ = get_sent_logprob_batch([])
