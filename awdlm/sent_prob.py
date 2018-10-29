@@ -12,7 +12,7 @@ from collections import OrderedDict
 
 parser = argparse.ArgumentParser(description='PyTorch PTB Language Model')
 
-model_corpus_dir = os.environ.get('AWD_LM_DIR', '/home/ubuntu/awd-lstm-lm/')
+model_corpus_dir = os.environ.get('AWD_LM_DIR', '/home/ubuntu/basem_trained_models/model_0')
 
 
 # Model parameters.
@@ -176,12 +176,12 @@ def get_sent_logprob_batch(sent_batch):
                 words.append( sent[i] )
                 next_words.append( sent[i+1] )
                 freq = min( get_word_freq(sent[i]), get_word_freq(sent[i+1]) )
-                if freq < 200:
+                if freq < 100:
                     #print('freq < 10')
                     words.append( unk_token )
                     next_words.append( unk_token )
                     finished_sentences.append(j)
-                    log_probs[j] = -1000                    
+                    log_probs[j] = -1000
             else:
                 words.append( unk_token )
                 next_words.append( unk_token )
@@ -201,14 +201,15 @@ def get_sent_logprob_batch(sent_batch):
 
         for j in range(batch_size):
             if not(j in finished_sentences):
-                """
+                
                 prior = 0
                 if get_word_freq(next_words[j]):
                     prior = np.log10( get_word_freq(next_words[j]) / 3287751 )
                 else:
                     prior = 0
-                """
-                log_prob = torch.log10( props[j][next_word_idxs[j]] ) #+ prior
+                #"""
+                log_prob = torch.log10( props[j][next_word_idxs[j]] ) #+ prior*2
+                #print(torch.log10( props[j][next_word_idxs[j]] ), prior)
                 log_probs[j] += log_prob.tolist()
 
         hidden = repackage_hidden(hidden)
